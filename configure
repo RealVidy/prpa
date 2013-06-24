@@ -1,0 +1,7 @@
+#!/bin/sh
+
+if [ "$1" = "--debug" ]; then
+    echo "DEBUG = -g" > makefile_include
+else
+    echo "DEBUG = " > makefile_include
+fi

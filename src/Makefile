@@ -1,42 +1,43 @@
+HOME = /home/ff/cs61c
 UNAME = $(shell uname)
 
 # running on hive machines
 ifeq ($(UNAME),Linux)
-CXX = g++ -std=c++11
+CC = gcc -std=gnu99
+#GOTO = $(HOME)/bin/GotoBLAS2_Linux
+GOTOLIB = -lm -lblas
 endif
 
-INCLUDES =
+# running on 200 SD machines
+ifeq ($(UNAME),Darwin)
+CC = gcc -std=gnu99
+#GOTO = $(HOME)/bin/GotoBLAS2
+GOTOLIB = -lm -lblas
+endif
+
+CPU_TYPE = core2
 OMP = -fopenmp
-LIBS = -lpthread
-CBLAS = -lblas -lm
-# a pretty good flag selection for this machine...
-CFLAGS = -msse4 -O3 -pipe -fno-omit-frame-pointer
-OUT_PATH = ../
+CFLAGS = -msse4 -O3 -pipe $(OMP) -march=$(CPU_TYPE)
+OUT = ../
 
-all:	bench-naive bench-all bench-para
-	#bench-openmp
+all: bench-naive bench-all bench-para
 
-# triple nested loop implementation
 bench-naive: benchmark.o sgemm-naive.o
-	$(CXX) -o $(OUT_PATH)$@ $(LIBS) benchmark.o sgemm-naive.o $(CBLAS)
-# your implementation for component 1
-bench-small: benchmark.o sgemm-small.o
-	$(CXX) -o $(OUT_PATH)$@ $(LIBS) benchmark.o sgemm-small.o $(CBLAS)
-# your implementation for component 2
+	$(CC) -o $(OUT)$@ $(OMP) benchmark.o sgemm-naive.o $(GOTOLIB)
 bench-all: benchmark.o sgemm-all.o
-	$(CXX) -o $(OUT_PATH)$@ $(LIBS) benchmark.o sgemm-all.o $(CBLAS)
+	$(CC) -o $(OUT)$@ benchmark.o sgemm-all.o $(GOTOLIB)
 bench-para: benchmark.o sgemm-para.o
-	$(CXX) -o $(OUT_PATH)$@ $(LIBS) benchmark.o sgemm-para.o $(CBLAS)
-# your implementation for component 3
+	$(CC) -o $(OUT)$@ $(OMP) benchmark.o sgemm-para.o $(GOTOLIB)
 bench-openmp: benchmark.o sgemm-openmp.o
-	$(CXX) -o $(OUT_PATH)$@ $(LIBS) $(OMP) benchmark.o sgemm-openmp.o $(CBLAS)
+	$(CC) -o $(OUT)$@ $(OMP) benchmark.o sgemm-openmp.o $(GOTOLIB)
+
 
 %.o: %.c
-	$(CXX) -c $(CFLAGS) $(INCLUDES) $<
-%.o: %.cc
-	$(CXX) -c $(CFLAGS) $(INCLUDES) $<
+	$(CC) -c $(CFLAGS) $<
+
+# Get assembly code with corresponding c code
+# %.o: %.c
+# 	$(CC) -c -g -Wa,-a,-ad $(CFLAGS) $(INCLUDES) $< > $<.lst
 
 clean:
-	rm -f *~ *.o
-	cd $(OUT_PATH) && rm -f bench-naive bench-small bench-all \
-		bench-openmp bench-para
+	@cd ..; rm -f bench-naive bench-small bench-all bench-openmp bench-para *.o *.lst
