@@ -31,7 +31,7 @@ int main( int argc, char **argv )
   int n = 64;
 
   /* Try different m */
-  for( int m = 64; m < 1000;  m += 64 )
+  for( int m = 64; m < 1000;  m += m/3 )
  //for(int n = 1; n < 100; n++)
 // for (int m = 1; m < 200; m++)
 // for( int m = 64; m < 10000;  m = m+1+m/3 )
