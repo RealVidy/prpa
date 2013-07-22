@@ -17,7 +17,7 @@ endif
 
 CPU_TYPE = native
 OMP = -fopenmp
-CFLAGS = -msse4 -O3 -pipe -fno-omit-frame-pointer $(OMP) -march=$(CPU_TYPE)
+CFLAGS = -msse4 -O3 $(DEBUG) -pipe -fno-omit-frame-pointer $(OMP) -march=$(CPU_TYPE)
 OUT = ../
 
 all: bench-all bench-para bench-new
