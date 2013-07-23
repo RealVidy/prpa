@@ -33,7 +33,7 @@ int main( int argc, char **argv )
   /* Try different m */
  //for(int n = 1; n < 100; n++)
 // for (int m = 64; m < 2000; m*=2)
-for( int m = 64; m < 10000;  m = m+1+m/3 )
+for( int m = 64; m < 1000;  m = m+1+m/3 )
     {
       /* Allocate and fill 2 random matrices A, C */
       float *A = (float*) malloc( m * n * sizeof(float) );

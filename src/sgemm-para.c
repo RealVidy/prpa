@@ -12,38 +12,37 @@ float* Abegin = NULL;
 
 void sgemm64First(int m, int n, float* A, float* C)
 {
-    __m128 tab[16]; 
-    __m128 res;
-    float* A2 = A;
     for (int k = 0; k < 64; ++k)
     {
+        float* A2 = A + k * m;
+        __m128 tab[16]; 
+        __m128 res;
         // Some loop Unrolling
-        tab[0] = LOADU(A);
-        tab[1] = LOADU(A + 4);
-        tab[2] = LOADU(A + 8);
-        tab[3] = LOADU(A + 12);
-        tab[4] = LOADU(A + 16);
-        tab[5] = LOADU(A + 20);
-        tab[6] = LOADU(A + 24);
-        tab[7] = LOADU(A + 28);
-        tab[8] = LOADU(A + 32);
-        tab[9] = LOADU(A + 36);
-        tab[10] = LOADU(A + 40);
-        tab[11] = LOADU(A + 44);
-        tab[12] = LOADU(A + 48);
-        tab[13] = LOADU(A + 52);
-        tab[14] = LOADU(A + 56);
-        tab[15] = LOADU(A + 60);
+        tab[0] = LOADU(A2);
+        tab[1] = LOADU(A2 + 4);
+        tab[2] = LOADU(A2 + 8);
+        tab[3] = LOADU(A2 + 12);
+        tab[4] = LOADU(A2 + 16);
+        tab[5] = LOADU(A2 + 20);
+        tab[6] = LOADU(A2 + 24);
+        tab[7] = LOADU(A2 + 28);
+        tab[8] = LOADU(A2 + 32);
+        tab[9] = LOADU(A2 + 36);
+        tab[10] = LOADU(A2 + 40);
+        tab[11] = LOADU(A2 + 44);
+        tab[12] = LOADU(A2 + 48);
+        tab[13] = LOADU(A2 + 52);
+        tab[14] = LOADU(A2 + 56);
+        tab[15] = LOADU(A2 + 60);
 
-        for (size_t tmp = 0; tmp < mSquared; tmp += m, ++A2)
+        size_t j = 0;
+        for (size_t tmp = 0; tmp < mSquared; tmp += m, ++j)
         {
-            res = LOAD1(A2);
+            res = LOAD1(A2 + j);
 
             for (int i = 0; i < 16; ++i)
-                STORE(C + tmp + (i * 4), (ADD(LOADU
-                                (C + tmp + i * 4), (MUL(tab[i], res)))));
+                STORE(C + tmp + (i * 4), (ADD(LOADU(C + tmp + i * 4), (MUL(tab[i], res)))));
         }
-        A += m;
     }
 }
 
@@ -211,8 +210,11 @@ void sgemm(int m, int n, float *A, float *C)
     if (m > 63)
         sgemm64First(m, n, A, C);
 
-    for (size_t i = 0; i < nb64 - 1; ++i, offsetY += 64)
+    for (size_t i = 0; i < nb64 - 1; ++i)
+    {
         sgemm64(m, n, A + offsetY, C + offsetY);
+        offsetY += 64;
+    }
     /*
        parallel_for(blocked_range<size_t>(0, nb64 - 1, 1),
        [=, &offsetY](const blocked_range<size_t>&r) -> void

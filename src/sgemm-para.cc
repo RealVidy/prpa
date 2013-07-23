@@ -15,6 +15,7 @@ void sgemm64First(int m, int n, float* A, float* C)
     __m128 tab[16]; 
     __m128 res;
     float* A2 = A;
+
     for (int k = 0; k < 64; ++k)
     {
         // Some loop Unrolling

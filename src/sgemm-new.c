@@ -1,12 +1,13 @@
 #include <emmintrin.h> // header file for the SSE intrinsics we're going to use
 #include <omp.h>
+#include <google/profiler.h>
 
 #define ADD _mm_add_ps
 #define MUL _mm_mul_ps
 #define STORE _mm_storeu_ps
 #define LOADU _mm_loadu_ps
 #define LOAD1 _mm_load1_ps
-#define NUM_THREADS 4
+#define NUM_THREADS 8
 
 void sgemm(int m, int n, float *A, float *C)
 {
@@ -16,6 +17,8 @@ void sgemm(int m, int n, float *A, float *C)
 
     //omp_set_num_threads(NUM_THREADS);
     // 64 by 64 part
+
+    ProfilerStart("mybin.prof");
 #pragma omp parallel
     {
 #pragma omp for schedule(dynamic) nowait
@@ -62,6 +65,8 @@ void sgemm(int m, int n, float *A, float *C)
             }
         }
     }
+
+    ProfilerStop();
 
     // Multiples of 4 under 64 here
     size_t count = nb64;
